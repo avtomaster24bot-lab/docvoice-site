@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocVoice — Заполняй документы голосом за 30 секунд | Excel из Telegram</title>
+<meta name="description" content="DocVoice — Telegram-бот для автоматического заполнения Excel-документов голосом. Для СТО, строительства, склада, бухгалтерии. Попробуйте бесплатно.">
+<meta name="keywords" content="заполнить excel голосом, telegram бот документы, акт выполненных работ, дефектовочный акт, накладная голосом, КС-2 автоматически, DocVoice">
+<meta property="og:title" content="DocVoice — Документы голосом за 30 секунд">
+<meta property="og:description" content="Надиктуйте заказ — получите готовый Excel. Для СТО, строительства, склада и производства.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --green-dark: #0D2B1E;
+    --green-mid: #1A4A30;
+    --green-accent: #2E7D52;
+    --white: #FFFFFF;
+    --gray-light: #F5F7F5;
+    --gray-text: #6B7B6E;
+    --shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--white);
+    color: #1A2E1F;
+    line-height: 1.6;
+  }
+
+  /* ── НАВБАР ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13, 43, 30, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 70px;
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 12px; text-decoration: none;
+  }
+  .nav-logo img { width: 44px; height: 44px; border-radius: 50%; }
+  .nav-logo span {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; font-size: 1.3rem;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+  .nav-links a {
+    color: rgba(255,255,255,0.8); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-cta {
+    background: var(--gold);
+    color: var(--green-dark) !important;
+    padding: 10px 22px; border-radius: 8px;
+    font-weight: 700 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--gold-light) !important; color: var(--green-dark) !important; }
+
+  /* ── ГЕРОЙ ── */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 50%, #0F3520 100%);
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    padding: 120px 5% 80px;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; top: -50%; right: -20%;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    max-width: 1200px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold-light); padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 900; color: var(--white);
+    line-height: 1.1; margin-bottom: 20px;
+  }
+
+  .hero h1 em {
+    font-style: normal; color: var(--gold);
+  }
+
+  .hero-sub {
+    color: rgba(255,255,255,0.7); font-size: 1.1rem;
+    margin-bottom: 40px; line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--green-dark);
+    padding: 16px 32px; border-radius: 10px;
+    font-weight: 700; font-size: 1rem;
+    text-decoration: none; display: inline-block;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); background: var(--gold-light); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--white);
+    padding: 16px 32px; border-radius: 10px;
+    font-weight: 600; font-size: 1rem;
+    text-decoration: none; display: inline-block;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); color: var(--gold); }
+
+  .hero-visual {
+    display: flex; justify-content: center; align-items: center;
+  }
+
+  .hero-logo-wrap {
+    position: relative;
+  }
+
+  .hero-logo-wrap img {
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.3));
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-16px); }
+  }
+
+  .hero-stats {
+    display: flex; gap: 32px; margin-top: 48px; padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .stat { }
+  .stat-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem; font-weight: 900; color: var(--gold);
+  }
+  .stat-label { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+
+  /* ── СЕКЦИИ ── */
+  section { padding: 100px 5%; }
+
+  .section-label {
+    display: inline-block;
+    color: var(--green-accent); font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 800; line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    color: var(--gray-text); font-size: 1.05rem;
+    max-width: 560px; margin-bottom: 60px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* ── КАК ЭТО РАБОТАЕТ ── */
+  .how-section { background: var(--gray-light); }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute; top: 40px; left: 15%; right: 15%; height: 2px;
+    background: linear-gradient(90deg, var(--green-accent), var(--gold));
+    z-index: 0;
+  }
+
+  .step {
+    background: var(--white);
+    border-radius: 16px; padding: 36px 28px;
+    position: relative; z-index: 1;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .step:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+
+  .step-num {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900; font-size: 1.3rem; color: var(--gold);
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(13,43,30,0.3);
+  }
+
+  .step h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+  .step p { color: var(--gray-text); font-size: 0.95rem; line-height: 1.6; }
+
+  .step-command {
+    display: inline-block; margin-top: 14px;
+    background: var(--green-dark); color: var(--gold);
+    padding: 6px 14px; border-radius: 6px;
+    font-family: monospace; font-size: 0.9rem; font-weight: 600;
+  }
+
+  /* ── ДЛЯ КОГО ── */
+  .industries {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+
+  .industry-card {
+    border: 2px solid #E8EDE9;
+    border-radius: 16px; padding: 28px 24px;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+  .industry-card:hover {
+    border-color: var(--green-accent);
+    transform: translateY(-4px);
+  }
+
+  .industry-icon { font-size: 2.4rem; margin-bottom: 14px; }
+  .industry-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  .industry-card p { color: var(--gray-text); font-size: 0.9rem; }
+  .industry-doc {
+    display: inline-block; margin-top: 12px;
+    background: var(--gray-light); color: var(--green-dark);
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600;
+  }
+
+  /* ── ИНСТРУКЦИЯ ── */
+  .guide-section { background: var(--green-dark); }
+  .guide-section h2 { color: var(--white); }
+  .guide-section .section-label { color: var(--gold); }
+  .guide-section .section-sub { color: rgba(255,255,255,0.6); }
+
+  .guide-steps {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+  }
+
+  .guide-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px; padding: 28px;
+    display: flex; gap: 20px;
+    transition: background 0.3s;
+  }
+  .guide-card:hover { background: rgba(255,255,255,0.08); }
+
+  .guide-num {
+    flex-shrink: 0;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(201,168,76,0.15);
+    border: 1.5px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; font-size: 1.1rem; color: var(--gold);
+  }
+
+  .guide-content h3 { color: var(--white); font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .guide-content p { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6; }
+
+  .guide-tip {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px;
+    background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.25);
+    color: var(--gold-light); padding: 5px 12px; border-radius: 6px;
+    font-size: 0.82rem; font-weight: 500;
+  }
+
+  /* ── ТАРИФЫ ── */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+  }
+
+  .plan {
+    border: 2px solid #E8EDE9;
+    border-radius: 16px; padding: 28px 20px;
+    position: relative; text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .plan:hover { transform: translateY(-6px); }
+
+  .plan.featured {
+    border-color: var(--gold);
+    background: var(--green-dark);
+    color: var(--white);
+  }
+
+  .plan-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: var(--green-dark);
+    padding: 4px 16px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+  }
+
+  .plan-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; font-size: 1.1rem; margin-bottom: 6px;
+  }
+  .plan.featured .plan-name { color: var(--gold); }
+
+  .plan-price {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900; font-size: 1.6rem; margin: 14px 0 4px;
+  }
+  .plan.featured .plan-price { color: var(--white); }
+
+  .plan-period { font-size: 0.78rem; color: var(--gray-text); margin-bottom: 4px; }
+  .plan.featured .plan-period { color: rgba(255,255,255,0.5); }
+
+  .plan-year {
+    font-size: 0.78rem; color: var(--green-accent); font-weight: 600; margin-bottom: 20px;
+  }
+  .plan.featured .plan-year { color: var(--gold-light); }
+
+  .plan-features { list-style: none; text-align: left; margin-bottom: 24px; }
+  .plan-features li {
+    padding: 6px 0; font-size: 0.88rem; color: var(--gray-text);
+    border-bottom: 1px solid #F0F2F0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .plan.featured .plan-features li { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.1); }
+  .plan-features li::before { content: '✓'; color: var(--green-accent); font-weight: 700; }
+  .plan.featured .plan-features li::before { color: var(--gold); }
+
+  .plan-btn {
+    display: block; text-align: center; text-decoration: none;
+    padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem;
+    background: var(--gray-light); color: var(--green-dark);
+    transition: background 0.2s;
+  }
+  .plan.featured .plan-btn { background: var(--gold); color: var(--green-dark); }
+  .plan-btn:hover { background: var(--green-accent); color: var(--white); }
+  .plan.featured .plan-btn:hover { background: var(--gold-light); }
+
+  /* ── FAQ ── */
+  .faq-section { background: var(--gray-light); }
+
+  .faq-list { max-width: 800px; margin: 0 auto; }
+
+  .faq-item {
+    background: var(--white);
+    border-radius: 12px; margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .faq-q {
+    padding: 20px 24px;
+    font-weight: 600; font-size: 1rem; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .faq-q:hover { background: var(--gray-light); }
+
+  .faq-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--green-dark); color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+
+  .faq-a {
+    padding: 0 24px; max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    color: var(--gray-text); font-size: 0.95rem; line-height: 1.7;
+  }
+
+  .faq-item.open .faq-a { max-height: 300px; padding: 0 24px 20px; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: linear-gradient(135deg, var(--green-dark), #0F3520);
+    text-align: center; padding: 100px 5%;
+  }
+  .cta-section h2 { color: var(--white); margin-bottom: 16px; }
+  .cta-section p { color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 40px; }
+
+  /* ── ФУТЕР ── */
+  footer {
+    background: #060F08; color: rgba(255,255,255,0.5);
+    padding: 40px 5%; text-align: center; font-size: 0.88rem;
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+
+  /* ── АДАПТИВ ── */
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; text-align: center; }
+    .hero-visual { display: none; }
+    .hero-actions { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .steps { grid-template-columns: 1fr; }
+    .steps::before { display: none; }
+    .industries { grid-template-columns: repeat(2, 1fr); }
+    .guide-steps { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .industries { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- НАВБАР -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="logo.png" alt="DocVoice">
+    <span>DocVoice</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">Как работает</a></li>
+    <li><a href="#industries">Для кого</a></li>
+    <li><a href="#guide">Инструкция</a></li>
+    <li><a href="#pricing">Тарифы</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="https://t.me/ExcelDocVoiceBot" class="nav-cta">Попробовать</a></li>
+  </ul>
+</nav>
+
+<!-- ГЕРОЙ -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-content">
+      <div class="hero-badge">🎤 Голосовое заполнение документов</div>
+      <h1>Документы&nbsp;голосом за <em>30&nbsp;секунд</em></h1>
+      <p class="hero-sub">Надиктуйте заказ в Telegram — получите готовый Excel с 4 вариантами цен. Без ручного ввода, без ошибок, без лишних движений.</p>
+      <div class="hero-actions">
+        <a href="https://t.me/ExcelDocVoiceBot" class="btn-primary">🚀 Попробовать бесплатно</a>
+        <a href="#how" class="btn-secondary">Как это работает →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">30с</div>
+          <div class="stat-label">время создания акта</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">4</div>
+          <div class="stat-label">варианта наценки</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">0</div>
+          <div class="stat-label">ручного ввода</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-logo-wrap">
+        <img src="logo.png" alt="DocVoice">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- КАК РАБОТАЕТ -->
+<section class="how-section" id="how">
+  <div class="container">
+    <div class="section-label">Простой процесс</div>
+    <h2>Три шага — и документ готов</h2>
+    <p class="section-sub">Никакого обучения, никаких настроек. Открыл — продиктовал — отправил.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Выбери шаблон</h3>
+        <p>Открой бота и выбери нужный шаблон из маркетплейса: СТО, строительство, склад, бухгалтерия или свой загруженный.</p>
+        <span class="step-command">/marketplace</span>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Надиктуй заказ</h3>
+        <p>Продиктуйте голосом: «Замена масла 3000, фильтр масляный 1500 — две штуки». ИИ сам распознаёт работы, запчасти, количество и цены.</p>
+        <span class="step-command">/new</span>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Получи Excel</h3>
+        <p>Через несколько секунд — готовый файл с 4 листами: базовая цена, +12%, +20%, +32%. Подписи и реквизиты уже внутри.</p>
+        <span class="step-command">📄 .xlsx</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ДЛЯ КОГО -->
+<section id="industries">
+  <div class="container">
+    <div class="section-label">Отрасли</div>
+    <h2>Работает в вашей сфере</h2>
+    <p class="section-sub">Готовые шаблоны под каждую отрасль — выбирайте из маркетплейса или загружайте свой.</p>
+    <div class="industries">
+      <div class="industry-card">
+        <div class="industry-icon">🔧</div>
+        <h3>Автосервис / СТО</h3>
+        <p>Дефектовочные акты, заказ-наряды. Работы и запчасти — в правильные колонки автоматически.</p>
+        <span class="industry-doc">Дефектовочный акт</span>
+      </div>
+      <div class="industry-card">
+        <div class="industry-icon">🏗</div>
+        <h3>Строительство</h3>
+        <p>КС-2 акты приёмки работ. Любое количество позиций — таблица растягивается автоматически.</p>
+        <span class="industry-doc">КС-2</span>
+      </div>
+      <div class="industry-card">
+        <div class="industry-icon">📦</div>
+        <h3>Склад / Логистика</h3>
+        <p>Накладные на отпуск материалов с расчётом НДС и итоговой суммой.</p>
+        <span class="industry-doc">Накладная</span>
+      </div>
+      <div class="industry-card">
+        <div class="industry-icon">🧾</div>
+        <h3>Бухгалтерия</h3>
+        <p>Акты выполненных работ по форме Р-1 (КЗ). С НДС и без — два листа в одном файле.</p>
+        <span class="industry-doc">Форма Р-1 (КЗ)</span>
+      </div>
+      <div class="industry-card">
+        <div class="industry-icon">⚙️</div>
+        <h3>Производство</h3>
+        <p>Наряд-заказы на производство работ. Изделие, количество, цена — всё в одном голосовом сообщении.</p>
+        <span class="industry-doc">Наряд-заказ</span>
+      </div>
+      <div class="industry-card">
+        <div class="industry-icon">📋</div>
+        <h3>Свой шаблон</h3>
+        <p>Загрузите любой Excel-шаблон вашей компании — бот научится его заполнять.</p>
+        <span class="industry-doc">/set_template</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ИНСТРУКЦИЯ -->
+<section class="guide-section" id="guide">
+  <div class="container">
+    <div class="section-label">Инструкция</div>
+    <h2 style="color:white">Как начать за 5 минут</h2>
+    <p class="section-sub">Пошаговый гид для владельца бизнеса и мастера</p>
+    <div class="guide-steps">
+      <div class="guide-card">
+        <div class="guide-num">1</div>
+        <div class="guide-content">
+          <h3>Откройте бота в Telegram</h3>
+          <p>Найдите <strong style="color:#C9A84C">@ExcelDocVoiceBot</strong> или нажмите кнопку «Попробовать бесплатно». Напишите /start — бот покажет ваш ID и основные команды.</p>
+          <span class="guide-tip">🤖 Работает на телефоне и компьютере одновременно</span>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">2</div>
+        <div class="guide-content">
+          <h3>Выберите шаблон из маркетплейса</h3>
+          <p>Напишите <strong style="color:#C9A84C">/marketplace</strong>, выберите вашу отрасль → шаблон → нажмите «Добавить» → «Сделать активным».</p>
+          <span class="guide-tip">📎 Или загрузите свой Excel через /set_template</span>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">3</div>
+        <div class="guide-content">
+          <h3>Создайте первый документ</h3>
+          <p>Напишите <strong style="color:#C9A84C">/new</strong>. Бот спросит реквизиты (организация, дата, номер). Потом — диктуйте позиции голосом или текстом.</p>
+          <span class="guide-tip">🎤 Пример: «Замена масла 3000, фильтр 1500 две штуки»</span>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">4</div>
+        <div class="guide-content">
+          <h3>Добавьте мастера (по желанию)</h3>
+          <p>Мастер пишет /start боту и сообщает вам свой ID. Вы вводите <strong style="color:#C9A84C">/add_master</strong> и его ID — теперь мастер работает под вашей подпиской.</p>
+          <span class="guide-tip">👥 Мастер создаёт акты — вы проверяете и утверждаете</span>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">5</div>
+        <div class="guide-content">
+          <h3>Проверяйте и утверждайте</h3>
+          <p>Когда мастер завершает акт — вам приходит уведомление с кнопками ✅ Подтвердить / ❌ Отклонить. История всех актов — в /history.</p>
+          <span class="guide-tip">📋 /history — все акты вас и мастеров</span>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">6</div>
+        <div class="guide-content">
+          <h3>Полезные команды</h3>
+          <p><strong style="color:#C9A84C">/status</strong> — ваш тариф и лимиты<br>
+          <strong style="color:#C9A84C">/subscribe</strong> — тарифы и оплата<br>
+          <strong style="color:#C9A84C">/help</strong> — полная инструкция<br>
+          <strong style="color:#C9A84C">/masters</strong> — список ваших мастеров</p>
+          <span class="guide-tip">❓ Вопросы: @GrifRift555</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ТАРИФЫ -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Тарифы</div>
+    <h2>Прозрачные цены</h2>
+    <p class="section-sub">При годовой оплате скидка 20%. Все тарифы включают бесплатный пробный период 7 дней.</p>
+    <div class="pricing-grid">
+
+      <div class="plan">
+        <div class="plan-name">Бесплатный</div>
+        <div class="plan-price">0 ₸</div>
+        <div class="plan-period">7 дней пробного</div>
+        <div class="plan-year">&nbsp;</div>
+        <ul class="plan-features">
+          <li>5 актов в месяц</li>
+          <li>1 шаблон</li>
+          <li>Только вы</li>
+        </ul>
+        <a href="https://t.me/ExcelDocVoiceBot" class="plan-btn">Начать</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Старт</div>
+        <div class="plan-price">9 900 ₸</div>
+        <div class="plan-period">в месяц</div>
+        <div class="plan-year">или 95 040 ₸/год (−20%)</div>
+        <ul class="plan-features">
+          <li>50 актов в месяц</li>
+          <li>2 шаблона</li>
+          <li>1 мастер</li>
+        </ul>
+        <a href="https://t.me/GrifRift555?text=Хочу%20тариф%20Старт%20(9%20900%20тг%2Fмес)%20для%20DocVoice" class="plan-btn">Подключить</a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-badge">Популярный</div>
+        <div class="plan-name">Бизнес</div>
+        <div class="plan-price">19 900 ₸</div>
+        <div class="plan-period">в месяц</div>
+        <div class="plan-year">или 191 040 ₸/год (−20%)</div>
+        <ul class="plan-features">
+          <li>200 актов в месяц</li>
+          <li>5 шаблонов</li>
+          <li>3 мастера</li>
+        </ul>
+        <a href="https://t.me/GrifRift555?text=Хочу%20тариф%20Бизнес%20(19%20900%20тг%2Fмес)%20для%20DocVoice" class="plan-btn">Подключить</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Корп</div>
+        <div class="plan-price">36 000 ₸</div>
+        <div class="plan-period">в месяц</div>
+        <div class="plan-year">или 345 600 ₸/год (−20%)</div>
+        <ul class="plan-features">
+          <li>Безлимит актов</li>
+          <li>10 шаблонов</li>
+          <li>5 мастеров</li>
+        </ul>
+        <a href="https://t.me/GrifRift555?text=Хочу%20тариф%20Корп%20(36%20000%20тг%2Fмес)%20для%20DocVoice" class="plan-btn">Подключить</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">59 000 ₸</div>
+        <div class="plan-period">в месяц</div>
+        <div class="plan-year">или 566 400 ₸/год (−20%)</div>
+        <ul class="plan-features">
+          <li>Безлимит всего</li>
+          <li>Все шаблоны</li>
+          <li>10+ мастеров</li>
+        </ul>
+        <a href="https://t.me/GrifRift555?text=Хочу%20тариф%20Enterprise%20(59%20000%20тг%2Fмес)%20для%20DocVoice" class="plan-btn">Подключить</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 style="text-align:center; margin-bottom:48px">Часто задаваемые вопросы</h2>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-q">
+          Нужно ли скачивать приложение?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Нет. DocVoice работает прямо в Telegram — приложении, которое уже установлено на вашем телефоне. Откройте чат с ботом и начните работу.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          Как мастер получает доступ?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Мастер открывает бота @ExcelDocVoiceBot, пишет /start и видит свой Telegram ID. Вы вводите этот ID командой /add_master — и мастер автоматически подключается к вашей подписке. Мастер создаёт акты, вы видите все их заказы в общей истории и можете подтверждать или отклонять.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          Можно ли использовать свой шаблон Excel?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Да. Отправьте ваш .xlsx файл боту командой /set_template и пройдите настройку колонок — бот запомнит структуру вашего документа и будет заполнять именно его.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          Точно ли распознаётся голос?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Для распознавания используется технология Whisper от OpenAI — одна из лучших на рынке. После распознавания бот показывает список позиций для проверки перед генерацией документа. Вы можете исправить любую позицию перед тем как подтвердить.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          Что такое 4 варианта цен?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Каждый Excel-файл содержит 4 листа: базовая цена, +12%, +20%, +32%. Вы сами выбираете нужный лист в зависимости от клиента или ситуации. Все расчёты автоматические.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          Как оплатить тариф?
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a">Напишите в Telegram @GrifRift555 или нажмите кнопку «Подключить» под нужным тарифом. Оплата через Kaspi. После оплаты тариф подключается вручную в течение нескольких минут.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Начните бесплатно прямо сейчас</h2>
+    <p>5 актов в месяц — бесплатно. Никакой карты, никакой регистрации.</p>
+    <a href="https://t.me/ExcelDocVoiceBot" class="btn-primary" style="font-size:1.1rem; padding:18px 40px">
+      🎤 Открыть DocVoice в Telegram
+    </a>
+  </div>
+</section>
+
+<!-- ФУТЕР -->
+<footer>
+  <p>© 2026 DocVoice — ДокументГолосом &nbsp;|&nbsp;
+    <a href="https://t.me/ExcelDocVoiceBot">@ExcelDocVoiceBot</a> &nbsp;|&nbsp;
+    Поддержка: <a href="https://t.me/GrifRift555">@GrifRift555</a>
+  </p>
+</footer>
+
+<script>
+  // FAQ аккордеон
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Плавная навигация
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
